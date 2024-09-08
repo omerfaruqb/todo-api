@@ -1,20 +1,18 @@
 const userService = require("../services/user.service");
 
-const secretKey = "secret";
+const secretKey = "secret"; // Consider moving this to a config file or environment variable
 
-const addUser = async (request, response) => {
-  const { name, email, password } = request.body;
+// Add a new user
+const addUser = async (req, res) => {
+  const { name, email, password } = req.body;
 
+  // Validate input
   if (!name || !email || !password) {
-    return response
-      .status(400)
-      .json({ message: "Missing one or more required fields" }); // Bad Request
+    return res.status(400).json({ message: "Missing one or more required fields" }); // Bad Request
   }
 
   if (password.length < 8) {
-    return response
-      .status(400)
-      .json({ message: "Password must be at least 8 characters long" }); // Bad Request
+    return res.status(400).json({ message: "Password must be at least 8 characters long" }); // Bad Request
   }
 
   try {
@@ -22,39 +20,37 @@ const addUser = async (request, response) => {
     const { success, message, token } = result;
 
     if (!success) {
-      response.status(400).json({ message: message }); // Bad Request
+      return res.status(400).json({ message: message }); // Bad Request
     } else {
-      response.status(201).json({ message: message, token: token }); // Created
+      return res.status(201).json({ message: message, token: token }); // Created
     }
   } catch (err) {
+    // Log error for debugging purposes (consider using a logger)
     // console.debug(err + " in user.controller");
-    response.status(500).json({ message: err.message }); // Internal Server Error
+    return res.status(500).json({ message: err.message }); // Internal Server Error
   }
 };
 
-const loginUser = async (request, response) => {
-  const { email, password } = request.body;
-  try {
-    if (!email || !password) {
-      return response
-        .status(400)
-        .json({ message: "Email and password are required" }); // Bad Request
-    }
+// Log in a user
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
 
-    const { success, message, token } = await userService.lo(
-      email,
-      password
-    );
+  // Validate input
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" }); // Bad Request
+  }
+
+  try {
+    const { success, message, token } = await userService.loginUser(email, password);
 
     if (!success) {
-      response.status(401).json({ message: message }); // Unauthorized
+      return res.status(401).json({ message: message }); // Unauthorized
     } else {
-      response.status(200).json({ message: message, token: token }); // OK
+      return res.status(200).json({ message: message, token: token }); // OK
     }
   } catch (err) {
-    response.status(500).json({ error: err.message }); // Internal Server Error
+    return res.status(500).json({ message: err.message }); // Internal Server Error
   }
 };
-
 
 module.exports = { addUser, loginUser };

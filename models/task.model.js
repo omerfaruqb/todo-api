@@ -35,23 +35,67 @@ const deleteTask = (id) => {
       if (err) {
         reject("Error when deleting data from the database");
       } else {
-        resolve(`Task deleted ${this.changes}`);
+        resolve(this.changes);
       }
     });
   });
 };
 
-const getTaskByUserId = (userId) => {
+const getTasksByUserId = (userId, page, limit) => {
+  const offset = (page - 1) * limit;
+  const totalTasks = db.get(
+    `SELECT COUNT(*) as total FROM tasks WHERE user_id = ?`, [userId]
+  );
+  const totalPages = Math.ceil(totalTasks / limit);
+
+  if (page > totalPages) {
+    return Promise.reject("Page number is invalid");
+  }
+
   return new Promise((resolve, reject) => {
-    db.all(`SELECT * FROM tasks WHERE user_id = ?`, [userId], (err, rows) => {
+    db.all(
+      `SELECT * FROM tasks WHERE user_id = ? LIMIT ? OFFSET ?`,
+      [userId, limit, offset],
+      (err, rows) => {
+        if (err) {
+          reject("Error when retrieving data from the database");
+        } else {
+          resolve({
+            tasks: rows,
+            totalPages: totalPages,
+          });
+        }
+      }
+    );
+  });
+};
+
+const getTaskById = (id) => {
+  return new Promise((resolve, reject) => {
+    db.all(`SELECT * FROM tasks WHERE id = ?`, [id], (err, row) => {
       if (err) {
         reject("Error when retrieving data from the database");
       } else {
-        resolve(rows);
+        resolve(row);
       }
     });
   });
 };
 
+const updateTask = (id, title, description) => {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `UPDATE tasks SET title = ?, description = ? WHERE id = ?`,
+      [title, description, id],
+      function (err) {
+        if (err) {
+          reject("Error when updating data from the database");
+        } else {
+          resolve(this.changes); // Return the number of rows affected
+        }
+      }
+    );
+  });
+};
 
-module.exports = { addTask, deleteTask, getTaskByUserId };
+module.exports = { addTask, deleteTask, getTasksByUserId, updateTask };
