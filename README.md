@@ -35,6 +35,7 @@ Make sure you have the following installed:
    ```bash
    npm start
    ```
+2. The server will be running on http://localhost:3000 by default.
 
 ---
 
