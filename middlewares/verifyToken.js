@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const SECRET_KEY = "secret";
+const SECRET_KEY = "secret"; // You can change this with your own secret key
 
 const verifyToken = (req, res, next) => {
   const header = req.headers["authorization"];
@@ -12,11 +12,9 @@ const verifyToken = (req, res, next) => {
 
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err) {
-      return res
-        .status(403)
-        .json({
-          message: req.path === "/update" ? "Forbidden" : "Unauthorized",
-        });
+      return res.status(403).json({
+        message: req.path === "/update" ? "Forbidden" : "Unauthorized",
+      });
     }
     req.body.userId = decoded.id;
     next();
