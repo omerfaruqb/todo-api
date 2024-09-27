@@ -1,6 +1,6 @@
 # ToDo API
 
-A solution for ToDoList Project on [ToDo List API](https://roadmap.sh/projects/todo-list-api)
+A solution for ToDo List Project on [ToDo List API](https://roadmap.sh/projects/todo-list-api)
 
 ---
 
